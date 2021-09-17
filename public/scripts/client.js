@@ -6,23 +6,13 @@
 
 $(document).ready(function() {
 
-  const renderTweets = function(tweets) {
-    // loops through tweets
-    // calls createTweetElement for each tweet
-    // takes return value and appends it to the tweets container
-    console.log('TWEETS: ', tweets);
-    for (let tweet of tweets) {
-      $('.show-tweet').prepend(createTweetElement(tweet));
-    }
-  };
-
   // Escape functions to avoid XSS attacks
   const escape = function (str) {
     let div = document.createElement("div");
     div.appendChild(document.createTextNode(str));
     return div.innerHTML;
   };
-  
+
   const createTweetElement = function(tweet) { 
     const $tweet = $(` <section class="previous-tweet">
       <header class="tweet-header">
@@ -47,11 +37,21 @@ $(document).ready(function() {
     return $tweet;
   };
   
-
+  const renderTweets = function(tweets) {
+    // loops through tweets
+    // calls createTweetElement for each tweet
+    // takes return value and appends it to the tweets container
+    console.log('TWEETS: ', tweets);
+    for (let tweet of tweets) {
+      $('.show-tweet').prepend(createTweetElement(tweet));
+    }
+  };
+  
   $('#submitTweet').on('submit', function(event) {
     // stops refreshing not redirection
     event.preventDefault();
-    let form = $(this)
+    let form = $(event.target)
+    console.log('FORM: ', form)
 
     // 1st argument is selector, 2nd argument inside this
     const input = $('#tweet-text', form)
@@ -60,27 +60,36 @@ $(document).ready(function() {
     if (length === 0 || typeof length === null) {
       console.log('ALERT')
       $('.alertEmptyTweet').slideDown('slow');
+
       // alert('Empty Tweet! Please type out a tweet! ');
     } else if (length > 140) {
       $('.alertTooMany').slideDown('slow');
     } else {
-      const tweetData = ($(this).serialize());
-      $.post('/tweets', tweetData);
+      const tweetData = form.serialize();
+      console.log('TWEET DATA ', tweetData)
+      $.post('/tweets', tweetData)
+      // Clears counter
       $('.counter').val(140);
-      // Code is slow to update, but does update
-      loadTweets();
-      // clears tweet
+      //clears tweet
       input.val('');
+      //clears all tweets
+      $('.show-tweet').html('')
+      $('.loading-spinner').show()
+      setTimeout(loadTweets, 100)
+      // loadTweets();
     }
   
   });
 
   const loadTweets = function() {
+    
     $('.alertEmptyTweet').slideUp('slow');
     $('.alertTooMany').slideUp('slow');
     $.ajax('/tweets', { method: 'GET'})
     .then(function (result){
+      console.log('RESULT: ', result);
       renderTweets(result);
+      $('.loading-spinner').hide()
     });
 
   }
