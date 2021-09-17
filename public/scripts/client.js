@@ -46,7 +46,12 @@ $(document).ready(function() {
       $('.show-tweet').prepend(createTweetElement(tweet));
     }
   };
-  
+
+  const clearEmpty = function() {
+    $('.alertEmptyTweet').slideUp('slow');
+    $('.alertTooMany').slideUp('slow');
+  }
+
   $('#submitTweet').on('submit', function(event) {
     // stops refreshing not redirection
     event.preventDefault();
@@ -60,10 +65,10 @@ $(document).ready(function() {
     if (length === 0 || typeof length === null) {
       console.log('ALERT')
       $('.alertEmptyTweet').slideDown('slow');
-
-      // alert('Empty Tweet! Please type out a tweet! ');
+      setTimeout(clearEmpty, 5000);
     } else if (length > 140) {
       $('.alertTooMany').slideDown('slow');
+      setTimeout(clearEmpty, 5000);
     } else {
       const tweetData = form.serialize();
       console.log('TWEET DATA ', tweetData)
